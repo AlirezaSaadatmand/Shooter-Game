@@ -279,7 +279,6 @@ def reset():
     
 pygame.init()
 screen = pygame.display.set_mode( (WIDTH , HEIGHT), pygame.RESIZABLE)
-pygame.display.set_caption("Shooter")
 clock = pygame.time.Clock()
 
 level_text1 = pygame.font.Font(None , 50)
@@ -304,7 +303,7 @@ counter = 0
 ischeck = False
 
 while True:
-    
+    pygame.display.set_caption(f" FPS : {round(clock.get_fps())} Shooter")
     if count_score == 0:
         if level == 20:
             win_rect = win_text.get_rect(center = (WIDTH / 2 , HEIGHT / 2))

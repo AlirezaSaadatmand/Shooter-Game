@@ -7,6 +7,8 @@ canvas.height = window.innerHeight;
 let x = canvas.width / 2;
 let y = canvas.height / 2;
 
+let projectile_lst = [];
+
 ctx.fillStyle = "black"
 ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -67,6 +69,27 @@ class Player {
     }
 }
 
+class Projectile {
+    constructor(x, y, radius, color, angle) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.angle = angle
+        this.speed = -10
+    }
+    update() {
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+    }
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    }
+}
+
 const player = new Player(x, y, 15, "white");
 
 addEventListener("keydown", (event) => {
@@ -93,16 +116,25 @@ addEventListener("keyup", (event) => {
     }
 });
 
+addEventListener("click", (event) => {
+    let angle = Math.atan2(player.y - event.clientY, player.x - event.clientX)
+    projectile_lst.push(new Projectile(player.x, player.y, 5, "white", angle))
+});
+
 let animationId;
 
 function animate() {
     animationId = requestAnimationFrame(animate);
-    ctx.fillStyle = 'rgba(0 , 0 , 0 , 0.1)';
+    ctx.fillStyle = 'rgba(0 , 0 , 0 , 0.2)';
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
     player.move()
     player.draw()
 
+    projectile_lst.forEach((i) => {
+        i.update()
+        i.draw()
+    })
 
 }
 

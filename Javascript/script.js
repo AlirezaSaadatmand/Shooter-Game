@@ -9,9 +9,9 @@ let y = canvas.height / 2;
 
 let projectile_lst = [];
 let enemy_lst = [];
-let particle_lst = [];;
-ctx.fillStyle = "black"
-ctx.fillRect(0, 0, canvas.width, canvas.height)
+let particle_lst = [];
+ctx.fillStyle = "black";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 class Player {
     constructor(x, y, radius, color) {
@@ -32,16 +32,16 @@ class Player {
         let i = 0;
         lst.forEach((t) => {
             if (t == true) {
-                i++
+                i++;
             }
         });
 
         if (i == 1) {
-            let speed = (this.speed ** 2 * 2) ** 0.5
-            if (this.goingup) { this.y -= speed }
-            if (this.goingdown) { this.y += speed }
-            if (this.goingright) { this.x += speed }
-            if (this.goingleft) { this.x -= speed }
+            let speed = (this.speed ** 2 * 2) ** 0.5;
+            if (this.goingup) { this.y -= speed };
+            if (this.goingdown) { this.y += speed };
+            if (this.goingright) { this.x += speed };
+            if (this.goingleft) { this.x -= speed };
 
         } else if (i == 2) {
             if (this.goingup && this.goingright) {
@@ -75,8 +75,8 @@ class Projectile {
         this.y = y;
         this.radius = radius;
         this.color = color;
-        this.angle = angle
-        this.speed = -5
+        this.angle = angle;
+        this.speed = -5;
     }
     update() {
         this.x += Math.cos(this.angle) * this.speed;
@@ -110,20 +110,19 @@ class Enemy {
         ctx.fill();
     }
 }
-const a = 0.99;
 class Particle {
-    constructor(x, y, radius, color, anglex, angley) {
+    constructor(x, y, radius, color, anglex, angley, alpha) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
-        this.anglex = anglex;
-        this.angley = angley;
-        this.alpha = 1;
+        this.anglex = anglex * Math.random() * 6;
+        this.angley = angley * Math.random() * 6;
+        this.alpha = alpha;
     }
     update() {
-        this.x += Math.cos(this.anglex) * a;
-        this.y += Math.sin(this.angley) * a;
+        this.x += Math.cos(this.anglex) * 0.99;
+        this.y += Math.sin(this.angley) * 0.99;
         this.alpha -= 0.01;
     }
     draw() {
@@ -164,8 +163,8 @@ const player = new Player(x, y, 15, "white");
 // });
 
 addEventListener("click", (event) => {
-    let angle = Math.atan2(player.y - event.clientY, player.x - event.clientX)
-    projectile_lst.push(new Projectile(player.x, player.y, 5, "white", angle))
+    let angle = Math.atan2(player.y - event.clientY, player.x - event.clientX);
+    projectile_lst.push(new Projectile(player.x, player.y, 5, "white", angle));
 });
 
 let animationId;
@@ -198,48 +197,55 @@ createEnemy()
 function animate() {
     animationId = requestAnimationFrame(animate);
     ctx.fillStyle = 'rgba(0 , 0 , 0 , 0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    player.move()
-    player.draw()
+    player.move();
+    player.draw();
 
     particle_lst.forEach((particle) => {
-        if (particle.alpha <= 0) {
-            particle_lst.splice(particle_lst.indexOf(particle), 1)
+        if (particle.alpha < 0.01) {
+            particle_lst.splice(particle_lst.indexOf(particle), 1);
         } else {
-            particle.update()
-            particle.draw()
+            particle.update();
+            particle.draw();
         }
     });
 
     projectile_lst.forEach((pro) => {
         if (pro.x < -pro.radius || pro.x > canvas.width + pro.radius || pro.y < -pro.radius || pro.y > canvas.height + pro.radius) {
-            projectile_lst.splice(projectile_lst.indexOf(pro), 1)
+            projectile_lst.splice(projectile_lst.indexOf(pro), 1);
         }
 
         enemy_lst.forEach((enemy) => {
-            let dist = Math.hypot(pro.x - enemy.x, pro.y - enemy.y)
-            if (dist - pro.radius - pro.radius < pro.radius + pro.radius) {
+            let dist = Math.hypot(pro.x - enemy.x, pro.y - enemy.y);
+            if (dist - pro.radius - enemy.radius < 0) {
                 for (let i = 0; i < enemy.radius * 3; i++) {
-                    particle_lst.push(new Particle(pro.x, pro.y, Math.random() * 2, enemy.color, (Math.random() - 0.5) * (Math.random() * 6), (Math.random() - 0.5) * (Math.random() * 6)))
+                    particle_lst.push(new Particle(pro.x, pro.y, Math.random() * 2, enemy.color, (Math.random() * 6), (Math.random() * 6), Math.random() + 0.02));
                 }
-                enemy_lst.splice(enemy_lst.indexOf(enemy), 1)
-                projectile_lst.splice(projectile_lst.indexOf(pro), 1)
+                if (enemy.radius > 15) {
+                    for (let i = 0; i < 10; i++) {
+                        enemy.radius -= 1;
+                    }
+
+                } else {
+                    enemy_lst.splice(enemy_lst.indexOf(enemy), 1);
+                }
+                projectile_lst.splice(projectile_lst.indexOf(pro), 1);
             }
         })
-        pro.update()
-        pro.draw()
+        pro.update();
+        pro.draw();
     });
 
     enemy_lst.forEach((enemy) => {
         if (enemy.x < -enemy.radius || enemy.x > canvas.width + enemy.radius || enemy.y < -enemy.radius || enemy.y > canvas.height + enemy.radius) {
-            enemy_lst.splice(enemy_lst.indexOf(enemy), 1)
+            enemy_lst.splice(enemy_lst.indexOf(enemy), 1);
         }
-        enemy.update()
-        enemy.draw()
+        enemy.update();
+        enemy.draw();
     });
 
 
 }
 
-animate()
+animate();

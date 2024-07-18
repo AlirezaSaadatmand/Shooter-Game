@@ -1,11 +1,13 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
-
+const span = document.querySelector("#span");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let x = canvas.width / 2;
 let y = canvas.height / 2;
+
+let score = 0;
 
 let projectile_lst = [];
 let enemy_lst = [];
@@ -239,6 +241,8 @@ function animate() {
                 } else {
                     enemy_lst.splice(enemy_lst.indexOf(enemy), 1);
                 }
+                score += 100;
+                span.innerHTML = `Score : ${score}`;
                 projectile_lst.splice(projectile_lst.indexOf(pro), 1);
             }
         })
@@ -253,7 +257,7 @@ function animate() {
         // }
         let dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
         if (dist - player.radius - enemy.radius <= 0) {
-            cancelAnimationFrame(animationId)
+            cancelAnimationFrame(animationId);
         }
         enemy.update();
         enemy.draw();

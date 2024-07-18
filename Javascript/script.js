@@ -76,7 +76,7 @@ class Projectile {
         this.radius = radius;
         this.color = color;
         this.angle = angle;
-        this.speed = -5;
+        this.speed = 5;
     }
     update() {
         this.x += Math.cos(this.angle) * this.speed;
@@ -117,13 +117,13 @@ class Particle {
         this.y = y;
         this.radius = radius;
         this.color = color;
-        this.anglex = anglex * Math.random() * 6;
-        this.angley = angley * Math.random() * 6;
+        this.anglex = anglex;
+        this.angley = angley;
         this.alpha = alpha;
     }
     update() {
-        this.x += Math.cos(this.anglex) * 0.99;
-        this.y += Math.sin(this.angley) * 0.99;
+        this.x += this.anglex * 0.99;
+        this.y += this.angley * 0.99;
         this.alpha -= 0.01;
     }
     draw() {
@@ -166,7 +166,7 @@ const player = new Player(x, y, 15, "white");
 // });
 
 addEventListener("click", (event) => {
-    let angle = Math.atan2(player.y - event.clientY, player.x - event.clientX);
+    let angle = Math.atan2(event.clientY - player.y, event.clientX - player.x);
     projectile_lst.push(new Projectile(player.x, player.y, 5, "white", angle));
 });
 
@@ -225,14 +225,14 @@ function animate() {
         enemy_lst.forEach((enemy) => {
             let dist = Math.hypot(pro.x - enemy.x, pro.y - enemy.y);
             if (dist - pro.radius - enemy.radius < 0) {
-                for (let i = 0; i < enemy.radius * 3; i++) {
-                    particle_lst.push(new Particle(pro.x, pro.y, Math.random() * 2, enemy.color, (Math.random() * 6), (Math.random() * 6), Math.random() + 0.02));
+                for (let i = 0; i < enemy.radius * 2; i++) {
+                    particle_lst.push(new Particle(pro.x, pro.y, Math.random() * 2, enemy.color, (Math.random() - 0.5) * (Math.random() * 6), (Math.random() - 0.5) * (Math.random() * 6), 1));
                 }
-                if (enemy.radius > 15) {
+                if (enemy.radius > 20) {
                     let last = enemy.radius
                     let interval = setInterval(() => {
                         enemy.radius -= 1
-                        if (last - 10 == enemy.radius || enemy.radius < 5) {
+                        if (last - 10 == enemy.radius || enemy.radius < 10) {
                             clearInterval(interval)
                         }
                     }, 30);

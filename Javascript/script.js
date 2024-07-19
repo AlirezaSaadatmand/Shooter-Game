@@ -7,8 +7,6 @@ canvas.height = window.innerHeight;
 let x = canvas.width / 2;
 let y = canvas.height / 2;
 
-let shootSound = new Audio("assets/shooting sound.wav")
-
 let score = 0;
 
 let projectile_lst = [];
@@ -170,8 +168,6 @@ const player = new Player(x, y, 15, "white");
 addEventListener("click", (event) => {
     let angle = Math.atan2(event.clientY - player.y, event.clientX - player.x);
     projectile_lst.push(new Projectile(player.x, player.y, 5, "white", angle));
-    shootSound.paused();
-    shootSound.play();
 });
 
 let animationId;

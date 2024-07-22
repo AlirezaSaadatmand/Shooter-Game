@@ -8,4 +8,4 @@ https://github.com/AlirezaSaadatmand/Shooter-Game/assets/157215281/c5b41faa-cbfa
 
 the javascript version of the game is simpler compare to python version .
 
-Hope You Enjoy Playing 
+Hope You Enjoy

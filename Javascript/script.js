@@ -230,9 +230,12 @@ function animate() {
                 }
                 if (enemy.radius > 20) {
                     let last = enemy.radius
+                    let speed = enemy.speed
+                    enemy.speed *= 0.5
                     let interval = setInterval(() => {
                         enemy.radius -= 1
                         if (last - 10 == enemy.radius || enemy.radius < 10) {
+                            enemy.speed = speed
                             clearInterval(interval)
                         }
                     }, 30);

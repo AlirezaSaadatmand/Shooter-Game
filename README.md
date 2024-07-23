@@ -6,6 +6,8 @@ This game has 20 levels, in each level you have to destroy a certain number of e
 
 https://github.com/AlirezaSaadatmand/Shooter-Game/assets/157215281/c5b41faa-cbfa-4ebb-bfba-2ac7d2a4d5bb
 
-the javascript version of the game is simpler compare to python version .
+the javascript version of the game is simpler compare to python version
+
+but it has its unique featuers
 
 Hope You Enjoy

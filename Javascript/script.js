@@ -76,7 +76,7 @@ class Projectile {
         this.radius = radius;
         this.color = color;
         this.angle = angle;
-        this.speed = 5;
+        this.speed = 6;
     }
     update() {
         this.x += Math.cos(this.angle) * this.speed;
@@ -141,29 +141,29 @@ const player = new Player(x, y, 15, "white");
 
 // player movement
 
-// addEventListener("keydown", (event) => {
-//     if ((event.key == "w" || event.key == "W") && ~player.goingdown) {
-//         player.goingup = true;
-//     } else if ((event.key == "a" || event.key == "A") && ~player.goingright) {
-//         player.goingleft = true;
-//     } else if ((event.key == "d" || event.key == "D") && ~player.goingleft) {
-//         player.goingright = true;
-//     } else if ((event.key == "s" || event.key == "S") && ~player.goingup) {
-//         player.goingdown = true;
-//     }
-// });
+addEventListener("keydown", (event) => {
+    if ((event.key == "w" || event.key == "W") && ~player.goingdown) {
+        player.goingup = true;
+    } else if ((event.key == "a" || event.key == "A") && ~player.goingright) {
+        player.goingleft = true;
+    } else if ((event.key == "d" || event.key == "D") && ~player.goingleft) {
+        player.goingright = true;
+    } else if ((event.key == "s" || event.key == "S") && ~player.goingup) {
+        player.goingdown = true;
+    }
+});
 
-// addEventListener("keyup", (event) => {
-//     if (event.key == "w" || event.key == "W") {
-//         player.goingup = false;
-//     } else if (event.key == "s" || event.key == "S") {
-//         player.goingdown = false;
-//     } else if (event.key == "d" || event.key == "D") {
-//         player.goingright = false;
-//     } else if (event.key == "a" || event.key == "A") {
-//         player.goingleft = false;
-//     }
-// });
+addEventListener("keyup", (event) => {
+    if (event.key == "w" || event.key == "W") {
+        player.goingup = false;
+    } else if (event.key == "s" || event.key == "S") {
+        player.goingdown = false;
+    } else if (event.key == "d" || event.key == "D") {
+        player.goingright = false;
+    } else if (event.key == "a" || event.key == "A") {
+        player.goingleft = false;
+    }
+});
 
 addEventListener("click", (event) => {
     let angle = Math.atan2(event.clientY - player.y, event.clientX - player.x);
@@ -193,13 +193,13 @@ function createEnemy() {
         const speed = Math.random() + 0.5
 
         enemy_lst.push(new Enemy(x, y, radius, color, angle, speed))
-    }, 1000);
+    }, 500);
 }
 createEnemy();
 
 function animate() {
     animationId = requestAnimationFrame(animate);
-    ctx.fillStyle = 'rgba(0 , 0 , 0 , 0.1)';
+    ctx.fillStyle = 'rgba(0 , 0 , 0 , 0.2)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // player draw
@@ -253,9 +253,9 @@ function animate() {
 
     // enemy draw and end game
     enemy_lst.forEach((enemy) => {
-        // if (enemy.x < -enemy.radius || enemy.x > canvas.width + enemy.radius || enemy.y < -enemy.radius || enemy.y > canvas.height + enemy.radius) {
-        //     enemy_lst.splice(enemy_lst.indexOf(enemy), 1);
-        // }
+        if (enemy.x < -enemy.radius || enemy.x > canvas.width + enemy.radius || enemy.y < -enemy.radius || enemy.y > canvas.height + enemy.radius) {
+            enemy_lst.splice(enemy_lst.indexOf(enemy), 1);
+        }
         let dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
         if (dist - player.radius - enemy.radius <= 0) {
             cancelAnimationFrame(animationId);

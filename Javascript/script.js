@@ -174,7 +174,7 @@ let animationId;
 
 function createEnemy() {
     setInterval(() => {
-        if (Math.floor(Math.random() * 10) + 1 == 1){
+        if (Math.floor(Math.random() * 10) + 1  in [1 , 2]){
             var radius = Math.random() * 500;
         }else{
             var radius = Math.random() * (30 - 4) + 4;
@@ -197,7 +197,7 @@ function createEnemy() {
         const speed = Math.random() + 0.5
 
         enemy_lst.push(new Enemy(x, y, radius, color, angle, speed))
-    }, 1000);
+    }, 800);
 }
 createEnemy();
 
@@ -229,20 +229,22 @@ function animate() {
         enemy_lst.forEach((enemy) => {
             let dist = Math.hypot(pro.x - enemy.x, pro.y - enemy.y);
             if (dist - pro.radius - enemy.radius < 0) {
-                for (let i = 0; i < enemy.radius * 2; i++) {
+                if (enemy.radius < 50){
+                    var s = 2;
+                }else{
+                    var s = 0.5;
+                }
+                for (let i = 0; i < enemy.radius * s; i++) {
                     particle_lst.push(new Particle(pro.x, pro.y, Math.random() * 2, enemy.color, (Math.random() - 0.5) * (Math.random() * 6), (Math.random() - 0.5) * (Math.random() * 6), 1));
                 }
                 if (enemy.radius > 20) {
                     let last = enemy.radius;
-                    let speed = enemy.speed;
-                    enemy.speed *= 0.5;
                     let interval = setInterval(() => {
                         enemy.radius -= 1
                         if (last - 10 == enemy.radius || enemy.radius < 10) {
-                            enemy.speed = speed
                             clearInterval(interval)
                         }
-                    }, 30);
+                    }, 20);
                 } else {
                     enemy_lst.splice(enemy_lst.indexOf(enemy), 1);
                 }

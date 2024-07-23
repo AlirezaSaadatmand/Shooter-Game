@@ -93,20 +93,19 @@ def health_bar(player_health):
     border = pygame.draw.rect(screen, "white", pygame.Rect(WIDTH - 200 , 30 , 150 , 30) , 2  , 0)
 
 def shirink(object):
-    for _ in range(int(object.size *3)):
-        x = object.x
-        y = object.y
-        speed = random.uniform(0 , 3)
-        angle = random.uniform(-3 , 3)
-        size = random.uniform(0  , 2)
-        project = Projectile(x , y , speed , angle , size , object.r , object.g , object.b)
-        particle_lst.append(project)
+    if object.size < 100:
+        for _ in range(int(object.size *3)):
+            x = object.x
+            y = object.y
+            speed = random.uniform(0 , 3)
+            angle = random.uniform(-3 , 3)
+            size = random.uniform(0  , 2)
+            project = Projectile(x , y , speed , angle , size , object.r , object.g , object.b)
+            particle_lst.append(project)
 
 def calculate():
     global player_x , player_y
     mouse_x , mouse_y = pygame.mouse.get_pos()
-
-
     return math.atan2(mouse_y - player_y , mouse_x - player_x)
 
 def create_enemy():
@@ -117,19 +116,17 @@ def create_enemy():
     x = random.randint(-50 , WIDTH + 50)
     y = random.randint(-50 , HEIGHT + 50)
     
-    if choice == "x" and number == 1 : x = -50
+    if choice == "x"   and number == 1 : x = -50
     elif choice == "x" and number == 2 : x = WIDTH + 50
     elif choice == "y" and number == 1 : y = -50
     elif choice == "y" and number == 2 : y = HEIGHT + 50
-    
 
     global player_x , player_y
 
-
     angle = math.atan2(player_y - y  ,  player_x - x)
-
     
     speed = SPEED -1
+
     size = random.randint(10 , 30)
     if size > 20 :
         speed = random.uniform(0.2 , 0.7)
@@ -184,12 +181,14 @@ def collide(projectile , enemy):
         return False
 
 def draw():
+    # caculating the angle of the enemy
     for enemy in enemy_lst:
         enemy.angle = math.atan2(player_y - enemy.y  ,  player_x - enemy.x)
     global enemy_count
     global count_score
     pygame.draw.circle(screen, "white", (player_x , player_y), 15)
     
+    # Particle draw
     for pro in particle_lst:
         pro.update()
         pro.speed *= 0.985
@@ -204,7 +203,7 @@ def draw():
             pro.b -= 1
         pro.draw(screen)
     
-    for enemy  in should_shirink:
+    for enemy in should_shirink:
         if enemy[0].size > enemy[1] and enemy[0].size >= 15:
             enemy[0].size -= 0.5
     
@@ -241,11 +240,8 @@ def draw():
     health_bar(player_health)
 
 def check():
-    global player_health
-    global player_x
-    global player_y
-    global gameover
-    global end_game
+    global player_health , player_x , player_y , gameover , end_game
+
     if player_x - 10 > WIDTH or player_x + 10 < 0 or player_y - 10 > HEIGHT or player_y + 10 < 0:
         gameover = True
         end_game = True
@@ -253,21 +249,11 @@ def check():
         enemy = pygame.Rect(enemy.x - enemy.size, enemy.y - enemy.size , enemy.size*1.5 , enemy.size*1.5)
         player = pygame.Rect(player_x - 15 , player_y - 15 , 25 , 25)
         if enemy.colliderect(player):
-            
             player_health -= 1
             break
 
 def reset():
-    global gameover
-    global projectile_lst
-    global enemy_lst
-    global particle_lst
-    global player_health
-    global player_y
-    global player_x
-    global count_score
-    global enemy_count
-    global level
+    global gameover , projectile_lst , enemy_lst , particle_lst , player_health , player_y , player_x , count_score , enemy_count , level
     
     gameover = False
     projectile_lst = []
@@ -358,7 +344,6 @@ while True:
                 reset()
                 end_game = False
                 player_health = 150
-                
                           
         if event.type  == pygame.KEYUP:
             if event.key == pygame.K_w:

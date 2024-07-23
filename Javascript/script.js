@@ -174,7 +174,11 @@ let animationId;
 
 function createEnemy() {
     setInterval(() => {
-        const radius = Math.random() * (30 - 4) + 4
+        if (Math.floor(Math.random() * 10) + 1 == 1){
+            var radius = Math.random() * 500;
+        }else{
+            var radius = Math.random() * (30 - 4) + 4;
+        }
 
         let x
         let y
@@ -193,7 +197,7 @@ function createEnemy() {
         const speed = Math.random() + 0.5
 
         enemy_lst.push(new Enemy(x, y, radius, color, angle, speed))
-    }, 500);
+    }, 1000);
 }
 createEnemy();
 
@@ -229,9 +233,9 @@ function animate() {
                     particle_lst.push(new Particle(pro.x, pro.y, Math.random() * 2, enemy.color, (Math.random() - 0.5) * (Math.random() * 6), (Math.random() - 0.5) * (Math.random() * 6), 1));
                 }
                 if (enemy.radius > 20) {
-                    let last = enemy.radius
-                    let speed = enemy.speed
-                    enemy.speed *= 0.5
+                    let last = enemy.radius;
+                    let speed = enemy.speed;
+                    enemy.speed *= 0.5;
                     let interval = setInterval(() => {
                         enemy.radius -= 1
                         if (last - 10 == enemy.radius || enemy.radius < 10) {

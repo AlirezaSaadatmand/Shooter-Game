@@ -62,7 +62,7 @@ public:
         else if (side == 2) { pos = { -20, (float)GetRandomValue(0, HEIGHT) }; }
         else { pos = { WIDTH + 20, (float)GetRandomValue(0, HEIGHT) }; }
 
-        speed = 1.5f;
+        speed = (float)GetRandomValue(100 , 200) / 100.00 + 0.50;
 
         color = { 
             (unsigned char)GetRandomValue(0, 255),  
@@ -109,12 +109,12 @@ int main() {
     InitWindow(WIDTH, HEIGHT, "Projectile Movement Example");
     SetTargetFPS(60);
 
+    int counter = 0;
     while (!WindowShouldClose()) {
-        player.move();
-
-        while (enemies.size() < enemyCount){
+        if (counter % 40 == 0){
             enemies.push_back(Enemy(player.pos));
         }
+        player.move();
 
         for (int i = 0 ; i < enemies.size() ; i++) {
             if (enemies[i].Move()){
@@ -133,6 +133,7 @@ int main() {
         }
 
         EndDrawing();
+        counter++;
     }
 
     CloseWindow();

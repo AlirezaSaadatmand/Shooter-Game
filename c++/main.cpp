@@ -8,7 +8,7 @@ const int HEIGHT = 700;
 
 class Player {
 public:
-    std::vector<float> pos;
+    Vector2 pos;
     Color color = WHITE;
     int radius;
     int speed;
@@ -19,7 +19,7 @@ public:
         this->speed = speed;
     }
 
-    void move() {
+    void Move() {
         bool up = IsKeyDown(KEY_W);
         bool down = IsKeyDown(KEY_S);
         bool left = IsKeyDown(KEY_A);
@@ -30,16 +30,16 @@ public:
 
         if (horizontal != 0 && vertical != 0) {
             double diagSpeed = speed / std::sqrt(2);
-            pos[0] += horizontal * diagSpeed;
-            pos[1] += vertical * diagSpeed;
+            pos.x += horizontal * diagSpeed;
+            pos.y += vertical * diagSpeed;
         } else {
-            pos[0] += horizontal * speed;
-            pos[1] += vertical * speed;
+            pos.x += horizontal * speed;
+            pos.y += vertical * speed;
         }
     }
 
-    void draw() {
-        DrawCircle(pos[0], pos[1], radius, color);
+    void Draw() {
+        DrawCircleV({ pos.x, pos.y }, radius, color);
     }
 };
 
@@ -49,13 +49,13 @@ float CalculateAngle(Vector2 origin, Vector2 target) {
 
 class Enemy {
 public:
-    std::vector<float> pos;
+    Vector2 pos;
     float speed;
     float angle;
     int size;
     Color color;
 
-    Enemy(std::vector<float> playerPos) {
+    Enemy(Vector2 playerPos) {
         int side = GetRandomValue(0, 3);
         if (side == 0) { pos = { (float)GetRandomValue(0, WIDTH), -20 }; }
         else if (side == 1) { pos = { (float)GetRandomValue(0, WIDTH), HEIGHT + 20 }; }
@@ -71,31 +71,54 @@ public:
             255 
         };
 
-        Vector2 enemyPos = { pos[0], pos[1] };
-        Vector2 playerVec = { playerPos[0], playerPos[1] };
+        Vector2 enemyPos = { pos.x, pos.y };
+        Vector2 playerVec = { playerPos.x, playerPos.y };
 
-        angle = CalculateAngle(enemyPos, playerVec);
+        angle = CalculateAngle(pos, playerPos);
         size = GetRandomValue(10, 30);
     }
 
     int Move() {
-        Vector2 enemyPos = { pos[0], pos[1] };
+        pos.x += cos(angle) * speed;
+        pos.y += sin(angle) * speed;
 
-        pos[0] += cos(angle) * speed;
-        pos[1] += sin(angle) * speed;
-
-        if (pos[0] < -100 || pos[0] > WIDTH + 100 || pos[1] < -100 || pos[1] > HEIGHT + 100){
+        if (pos.x < -100 || pos.x > WIDTH + 100 || pos.y < -100 || pos.y > HEIGHT + 100){
             return 1;
         } 
         return 0;
     }
 
     void Draw() {
-        DrawCircleV({ pos[0], pos[1] }, size, color);
+        DrawCircleV({ pos.x, pos.y }, size, color);
     }
 };
 
 class Projectile {
+public:
+    Vector2 pos;
+    float speed = 6;
+    float angle;
+    int size = 5;
+    Color color = WHITE;
+
+    Projectile(Vector2 playerPos , Vector2 mousePos){
+        pos = playerPos;
+        angle = CalculateAngle(playerPos , mousePos);
+    }
+
+    int Move() {
+        pos.x += cos(angle) * speed;
+        pos.y += sin(angle) * speed;
+
+        if (pos.x < -100 || pos.x > WIDTH + 100 || pos.y < -100 || pos.y > HEIGHT + 100){
+            return 1;
+        } 
+        return 0;
+    }
+
+    void Draw() {
+        DrawCircleV({ pos.x, pos.y }, size, color);
+    }
 };
 
 int main() {
@@ -106,30 +129,43 @@ int main() {
 
     Player player(10, 3);
 
-    InitWindow(WIDTH, HEIGHT, "Projectile Movement Example");
+    InitWindow(WIDTH, HEIGHT, "Shooter game");
     SetTargetFPS(60);
 
     int counter = 0;
     while (!WindowShouldClose()) {
+        std::cout << projectiles.size() << std::endl;
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Vector2 mousePos = GetMousePosition();
+            std::cout << "Mouse clicked at: (" << mousePos.x << ", " << mousePos.y << ")" << std::endl;
+            projectiles.push_back(Projectile(player.pos, mousePos));
+        }
+
+
         if (counter % 40 == 0){
             enemies.push_back(Enemy(player.pos));
         }
-        player.move();
 
-        for (int i = 0 ; i < enemies.size() ; i++) {
-            if (enemies[i].Move()){
-                enemies.erase(enemies.begin() + i);
-            }
-        }
 
         BeginDrawing();
 
         DrawRectangle(0, 0, WIDTH, HEIGHT, Color{0, 0, 0, 64});
 
-        player.draw();
+        player.Move();
+        player.Draw();
 
-        for (auto &enemy : enemies) {
-            enemy.Draw();
+        for (int i = 0 ; i < projectiles.size() ; i++) {
+            if (projectiles[i].Move()){
+                projectiles.erase(projectiles.begin() + i);
+            }
+            projectiles[i].Draw();
+        }
+
+        for (int i = 0 ; i < enemies.size() ; i++) {
+            if (enemies[i].Move()){
+                enemies.erase(enemies.begin() + i);
+            }
+            enemies[i].Draw();
         }
 
         EndDrawing();

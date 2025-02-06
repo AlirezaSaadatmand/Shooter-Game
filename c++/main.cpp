@@ -7,40 +7,40 @@ const int WIDTH = 1200;
 const int HEIGHT = 700;
 
 class Player {
-public:
-    Vector2 pos;
-    Color color = WHITE;
-    int radius;
-    int speed;
+    public:
+        Vector2 pos;
+        Color color = WHITE;
+        int radius;
+        int speed;
 
-    Player(int radius, int speed) {
-        pos = { WIDTH / 2.0f, HEIGHT / 2.0f };
-        this->radius = radius;
-        this->speed = speed;
-    }
-
-    void Move() {
-        bool up = IsKeyDown(KEY_W);
-        bool down = IsKeyDown(KEY_S);
-        bool left = IsKeyDown(KEY_A);
-        bool right = IsKeyDown(KEY_D);
-
-        int horizontal = (right - left);
-        int vertical = (down - up);
-
-        if (horizontal != 0 && vertical != 0) {
-            double diagSpeed = speed / std::sqrt(2);
-            pos.x += horizontal * diagSpeed;
-            pos.y += vertical * diagSpeed;
-        } else {
-            pos.x += horizontal * speed;
-            pos.y += vertical * speed;
+        Player(int radius, int speed) {
+            pos = { WIDTH / 2.0f, HEIGHT / 2.0f };
+            this->radius = radius;
+            this->speed = speed;
         }
-    }
 
-    void Draw() {
-        DrawCircleV({ pos.x, pos.y }, radius, color);
-    }
+        void Move() {
+            bool up = IsKeyDown(KEY_W);
+            bool down = IsKeyDown(KEY_S);
+            bool left = IsKeyDown(KEY_A);
+            bool right = IsKeyDown(KEY_D);
+
+            int horizontal = (right - left);
+            int vertical = (down - up);
+
+            if (horizontal != 0 && vertical != 0) {
+                double diagSpeed = speed / std::sqrt(2);
+                pos.x += horizontal * diagSpeed;
+                pos.y += vertical * diagSpeed;
+            } else {
+                pos.x += horizontal * speed;
+                pos.y += vertical * speed;
+            }
+        }
+
+        void Draw() {
+            DrawCircleV({ pos.x, pos.y }, radius, color);
+        }
 };
 
 float CalculateAngle(Vector2 origin, Vector2 target) {
@@ -48,81 +48,85 @@ float CalculateAngle(Vector2 origin, Vector2 target) {
 }
 
 class Enemy {
-public:
-    Vector2 pos;
-    float speed;
-    float angle;
-    int size;
-    Color color;
+    public:
+        Vector2 pos;
+        float speed;
+        float angle;
+        int size;
+        Color color;
 
-    Enemy(Vector2 playerPos) {
-        int side = GetRandomValue(0, 3);
-        if (side == 0) { pos = { (float)GetRandomValue(0, WIDTH), -20 }; }
-        else if (side == 1) { pos = { (float)GetRandomValue(0, WIDTH), HEIGHT + 20 }; }
-        else if (side == 2) { pos = { -20, (float)GetRandomValue(0, HEIGHT) }; }
-        else { pos = { WIDTH + 20, (float)GetRandomValue(0, HEIGHT) }; }
+        Enemy(Vector2 playerPos) {
+            int side = GetRandomValue(0, 3);
+            if (side == 0) { pos = { (float)GetRandomValue(0, WIDTH), -20 }; }
+            else if (side == 1) { pos = { (float)GetRandomValue(0, WIDTH), HEIGHT + 20 }; }
+            else if (side == 2) { pos = { -20, (float)GetRandomValue(0, HEIGHT) }; }
+            else { pos = { WIDTH + 20, (float)GetRandomValue(0, HEIGHT) }; }
 
-        speed = (float)GetRandomValue(100 , 200) / 100.00 + 0.50;
+            speed = (float)GetRandomValue(100 , 200) / 100.00 + 0.50;
 
-        color = { 
-            (unsigned char)GetRandomValue(0, 255),  
-            (unsigned char)GetRandomValue(0, 255),  
-            (unsigned char)GetRandomValue(0, 255),  
-            255 
-        };
+            color = { 
+                (unsigned char)GetRandomValue(0, 255),  
+                (unsigned char)GetRandomValue(0, 255),  
+                (unsigned char)GetRandomValue(0, 255),  
+                255 
+            };
 
-        Vector2 enemyPos = { pos.x, pos.y };
-        Vector2 playerVec = { playerPos.x, playerPos.y };
+            Vector2 enemyPos = { pos.x, pos.y };
+            Vector2 playerVec = { playerPos.x, playerPos.y };
 
-        angle = CalculateAngle(pos, playerPos);
-        size = GetRandomValue(10, 30);
-    }
+            angle = CalculateAngle(pos, playerPos);
+            size = GetRandomValue(10, 30);
+        }
 
-    int Move() {
-        pos.x += cos(angle) * speed;
-        pos.y += sin(angle) * speed;
+        int Move() {
+            pos.x += cos(angle) * speed;
+            pos.y += sin(angle) * speed;
 
-        if (pos.x < -100 || pos.x > WIDTH + 100 || pos.y < -100 || pos.y > HEIGHT + 100){
-            return 1;
-        } 
-        return 0;
-    }
+            if (pos.x < -100 || pos.x > WIDTH + 100 || pos.y < -100 || pos.y > HEIGHT + 100){
+                return 1;
+            } 
+            return 0;
+        }
 
-    void Draw() {
-        DrawCircleV({ pos.x, pos.y }, size, color);
-    }
+        void Draw() {
+            DrawCircleV({ pos.x, pos.y }, size, color);
+        }
 };
 
 class Projectile {
-public:
-    Vector2 pos;
-    float speed = 6;
-    float angle;
-    int size = 5;
-    Color color = WHITE;
+    public:
+        Vector2 pos;
+        float speed = 6;
+        float angle;
+        int size = 5;
+        Color color = WHITE;
 
-    Projectile(Vector2 playerPos , Vector2 mousePos){
-        pos = playerPos;
-        angle = CalculateAngle(playerPos , mousePos);
-    }
+        Projectile(Vector2 playerPos , Vector2 mousePos){
+            pos = playerPos;
+            angle = CalculateAngle(playerPos , mousePos);
+        }
 
-    int Move() {
-        pos.x += cos(angle) * speed;
-        pos.y += sin(angle) * speed;
+        int Move() {
+            pos.x += cos(angle) * speed;
+            pos.y += sin(angle) * speed;
 
-        if (pos.x < -100 || pos.x > WIDTH + 100 || pos.y < -100 || pos.y > HEIGHT + 100){
-            return 1;
-        } 
-        return 0;
-    }
+            if (pos.x < -100 || pos.x > WIDTH + 100 || pos.y < -100 || pos.y > HEIGHT + 100){
+                return 1;
+            } 
+            return 0;
+        }
 
-    void Draw() {
-        DrawCircleV({ pos.x, pos.y }, size, color);
-    }
+        void Draw() {
+            DrawCircleV({ pos.x, pos.y }, size, color);
+        }
 };
 
+class Particle {
+
+};
+
+
 int main() {
-    int enemyCount = 50;
 
     std::vector<Enemy> enemies;
     std::vector<Projectile> projectiles;
@@ -158,6 +162,19 @@ int main() {
             if (projectiles[i].Move()){
                 projectiles.erase(projectiles.begin() + i);
             }
+
+            for (int j = 0; j < enemies.size() ; j++) {
+
+                float dx = projectiles[i].pos.x - enemies[j].pos.x;
+                float dy = projectiles[i].pos.y - enemies[j].pos.y;
+                float distance = sqrt(dx * dx + dy * dy);
+                if (distance <= projectiles[i].size + enemies[j].size) {
+                    projectiles.erase(projectiles.begin() + i);
+                    enemies.erase(enemies.begin() + j);
+                    continue;
+                }
+            }
+
             projectiles[i].Draw();
         }
 

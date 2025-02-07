@@ -52,8 +52,9 @@ class Enemy {
         Vector2 pos;
         float speed;
         float angle;
-        int size;
+        int radius;
         Color color;
+        int shirink = 0;
 
         Enemy(Vector2 playerPos) {
             int side = GetRandomValue(0, 3);
@@ -75,7 +76,7 @@ class Enemy {
             Vector2 playerVec = { playerPos.x, playerPos.y };
 
             angle = CalculateAngle(pos, playerPos);
-            size = GetRandomValue(10, 30);
+            radius = GetRandomValue(10, 30);
         }
 
         int Move() {
@@ -88,8 +89,12 @@ class Enemy {
             return 0;
         }
 
+        void Shirink() {
+            radius--;
+        }
+
         void Draw() {
-            DrawCircleV({ pos.x, pos.y }, size, color);
+            DrawCircleV({ pos.x, pos.y }, radius, color);
         }
 };
 
@@ -98,7 +103,7 @@ class Projectile {
         Vector2 pos;
         float speed = 6;
         float angle;
-        int size = 5;
+        int radius = 5;
         Color color = WHITE;
 
         Projectile(Vector2 playerPos , Vector2 mousePos){
@@ -117,7 +122,7 @@ class Projectile {
         }
 
         void Draw() {
-            DrawCircleV({ pos.x, pos.y }, size, color);
+            DrawCircleV({ pos.x, pos.y }, radius, color);
         }
 };
 
@@ -138,10 +143,8 @@ int main() {
 
     int counter = 0;
     while (!WindowShouldClose()) {
-        std::cout << projectiles.size() << std::endl;
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             Vector2 mousePos = GetMousePosition();
-            std::cout << "Mouse clicked at: (" << mousePos.x << ", " << mousePos.y << ")" << std::endl;
             projectiles.push_back(Projectile(player.pos, mousePos));
         }
 
@@ -168,9 +171,13 @@ int main() {
                 float dx = projectiles[i].pos.x - enemies[j].pos.x;
                 float dy = projectiles[i].pos.y - enemies[j].pos.y;
                 float distance = sqrt(dx * dx + dy * dy);
-                if (distance <= projectiles[i].size + enemies[j].size) {
+                if (distance <= projectiles[i].radius + enemies[j].radius) {
+                    if (enemies[j].radius < 20){
+                        enemies.erase(enemies.begin() + j);
+                    } else {
+                        enemies[j].shirink = counter + enemies[j].radius / 2;
+                    }
                     projectiles.erase(projectiles.begin() + i);
-                    enemies.erase(enemies.begin() + j);
                     continue;
                 }
             }
@@ -181,6 +188,9 @@ int main() {
         for (int i = 0 ; i < enemies.size() ; i++) {
             if (enemies[i].Move()){
                 enemies.erase(enemies.begin() + i);
+            }
+            if (enemies[i].shirink > counter){
+                enemies[i].Shirink();
             }
             enemies[i].Draw();
         }

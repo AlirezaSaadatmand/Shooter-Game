@@ -170,6 +170,8 @@ int main() {
     InitWindow(WIDTH, HEIGHT, "Shooter game");
     SetTargetFPS(60);
 
+    int score = 0;
+
     int counter = 0;
     while (!WindowShouldClose()) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -185,6 +187,7 @@ int main() {
 
         BeginDrawing();
 
+        DrawText(TextFormat("Score: %d", score), 20, 20, 30, WHITE);
         DrawRectangle(0, 0, WIDTH, HEIGHT, Color{0, 0, 0, 64});
 
         player.Move();
@@ -210,6 +213,9 @@ int main() {
                 float dy = projectiles[i].pos.y - enemies[j].pos.y;
                 float distance = sqrt(dx * dx + dy * dy);
                 if (distance <= projectiles[i].radius + enemies[j].radius) {
+
+                    score += 100;
+                    
                     for (int k = 0 ; k < enemies[j].radius * 2 ; k++){
                         particles.push_back(Particle(projectiles[i].pos , enemies[j].color));
                     }

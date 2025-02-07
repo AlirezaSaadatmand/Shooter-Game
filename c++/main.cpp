@@ -72,9 +72,6 @@ class Enemy {
                 255 
             };
 
-            Vector2 enemyPos = { pos.x, pos.y };
-            Vector2 playerVec = { playerPos.x, playerPos.y };
-
             angle = CalculateAngle(pos, playerPos);
             radius = GetRandomValue(10, 30);
         }
@@ -127,7 +124,38 @@ class Projectile {
 };
 
 class Particle {
+    public:
+        Vector2 pos;
+        float speed;
+        float angleX;
+        float angleY;
+        int radius;
+        Color color;
+        int opacity;
 
+        Particle(Vector2 projectilePos , Color enemyColor){
+            pos = projectilePos;
+            color = enemyColor;
+            speed = 3;
+            radius = (float)GetRandomValue(1 , 300) / 100.0;
+            angleX = ((float)GetRandomValue(0 , 100) / 100.0 - 0.5) * ((float)GetRandomValue(0 , 100) / 100.0 * 6);
+            angleY = ((float)GetRandomValue(0 , 100) / 100.0 - 0.5) * ((float)GetRandomValue(0 , 100) / 100.0 * 6);
+            opacity = GetRandomValue(80 , 200);
+        }
+        
+        int Move(){
+            pos.x += angleX * 0.99;
+            pos.y += angleY * 0.99;
+            opacity--;
+            if (opacity <= 0) {
+                return 1;
+            }
+            color.a = opacity;
+            return 0;
+        }
+        void Draw() {
+            DrawCircleV({ pos.x, pos.y }, radius, color);
+        }
 };
 
 
@@ -135,6 +163,7 @@ int main() {
 
     std::vector<Enemy> enemies;
     std::vector<Projectile> projectiles;
+    std::vector<Particle> particles;
 
     Player player(10, 3);
 
@@ -161,6 +190,14 @@ int main() {
         player.Move();
         player.Draw();
 
+        for (int i = 0 ; i < particles.size() ; i++){
+            if (particles[i].Move()){
+                particles.erase(particles.begin() + 1);
+                continue;
+            }
+            particles[i].Draw();
+        }
+
         for (int i = 0 ; i < projectiles.size() ; i++) {
             if (projectiles[i].Move()){
                 projectiles.erase(projectiles.begin() + i);
@@ -176,6 +213,9 @@ int main() {
                         enemies.erase(enemies.begin() + j);
                     } else {
                         enemies[j].shirink = counter + enemies[j].radius / 2;
+                    }
+                    for (int k = 0 ; k < enemies[j].radius * 2 ; k++){
+                        particles.push_back(Particle(projectiles[i].pos , enemies[j].color));
                     }
                     projectiles.erase(projectiles.begin() + i);
                     continue;

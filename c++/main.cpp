@@ -133,7 +133,7 @@ class Particle {
         Color color;
         int opacity;
 
-        Particle(Vector2 projectilePos , Color enemyColor){
+        Particle(Vector2 projectilePos , Color& enemyColor){
             pos = projectilePos;
             color = enemyColor;
             speed = 3;
@@ -201,6 +201,7 @@ int main() {
         for (int i = 0 ; i < projectiles.size() ; i++) {
             if (projectiles[i].Move()){
                 projectiles.erase(projectiles.begin() + i);
+                continue;
             }
 
             for (int j = 0; j < enemies.size() ; j++) {
@@ -209,13 +210,13 @@ int main() {
                 float dy = projectiles[i].pos.y - enemies[j].pos.y;
                 float distance = sqrt(dx * dx + dy * dy);
                 if (distance <= projectiles[i].radius + enemies[j].radius) {
+                    for (int k = 0 ; k < enemies[j].radius * 2 ; k++){
+                        particles.push_back(Particle(projectiles[i].pos , enemies[j].color));
+                    }
                     if (enemies[j].radius < 20){
                         enemies.erase(enemies.begin() + j);
                     } else {
                         enemies[j].shirink = counter + enemies[j].radius / 2;
-                    }
-                    for (int k = 0 ; k < enemies[j].radius * 2 ; k++){
-                        particles.push_back(Particle(projectiles[i].pos , enemies[j].color));
                     }
                     projectiles.erase(projectiles.begin() + i);
                     continue;

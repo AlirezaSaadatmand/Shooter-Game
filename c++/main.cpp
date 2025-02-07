@@ -158,7 +158,6 @@ class Particle {
         }
 };
 
-
 int main() {
 
     std::vector<Enemy> enemies;
@@ -171,9 +170,10 @@ int main() {
     SetTargetFPS(60);
 
     int score = 0;
+    int gameOver = 0;
 
     int counter = 0;
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && !gameOver) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             Vector2 mousePos = GetMousePosition();
             projectiles.push_back(Projectile(player.pos, mousePos));
@@ -233,6 +233,13 @@ int main() {
         }
 
         for (int i = 0 ; i < enemies.size() ; i++) {
+            
+            float dx = player.pos.x - enemies[i].pos.x;
+            float dy = player.pos.y - enemies[i].pos.y;
+            float distance = sqrt(dx * dx + dy * dy);
+            if (distance <= player.radius + enemies[i].radius) {
+                    gameOver = 1;
+            }
             if (enemies[i].Move()){
                 enemies.erase(enemies.begin() + i);
             }

@@ -63,7 +63,7 @@ class Enemy {
             else if (side == 2) { pos = { -20, (float)GetRandomValue(0, HEIGHT) }; }
             else { pos = { WIDTH + 20, (float)GetRandomValue(0, HEIGHT) }; }
 
-            speed = (float)GetRandomValue(100 , 200) / 100.00 + 0.50;
+            speed = (float)GetRandomValue(50 , 150) / 100.00 + 0.50;
 
             color = { 
                 (unsigned char)GetRandomValue(0, 255),  
@@ -187,7 +187,7 @@ int main() {
 
         BeginDrawing();
 
-        DrawText(TextFormat("Score: %d", score), 20, 20, 30, WHITE);
+        DrawText(TextFormat("Score: %d", score), 20, 20, 20, WHITE);
         DrawRectangle(0, 0, WIDTH, HEIGHT, Color{0, 0, 0, 64});
 
         player.Move();

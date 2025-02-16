@@ -65,6 +65,11 @@ type Projectile struct {
 	angle  float32
 }
 
+func projectileMove(projectile *Projectile) {
+	projectile.x += float32(math.Cos(float64(projectile.angle)) * float64(projectile.speed))
+	projectile.y += float32(math.Sin(float64(projectile.angle)) * float64(projectile.speed))
+}
+
 type Enemy struct {
 	// x int
 	// y int
@@ -103,9 +108,9 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 
-		if rl.IsMouseButtonDown(rl.MouseLeftButton) {
+		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
 			mousePos := rl.GetMousePosition()
-			angle := math.Atan2(float64(player.y)-float64(mousePos.Y), float64(player.x)-float64(mousePos.X))
+			angle := math.Atan2(float64(mousePos.Y)-float64(player.y), float64(mousePos.X)-float64(player.x))
 			projectiles = append(projectiles, Projectile{x: player.x, y: player.y, speed: 5, radius: 4, angle: float32(angle)})
 		}
 
@@ -113,6 +118,7 @@ func main() {
 		rl.ClearBackground(color.RGBA{34, 40, 49, 50})
 
 		for i := 0; i < len(projectiles); i++ {
+			projectileMove(&projectiles[i])
 			rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
 		}
 

@@ -10,6 +10,8 @@ import (
 const WIDTH = 1200
 const HEIGHT = 700
 
+var projectiles []Projectile
+
 type Player struct {
 	x      float32
 	y      float32
@@ -21,21 +23,6 @@ type Player struct {
 	goingDown  bool
 	goingRight bool
 	goingLeft  bool
-}
-
-type Enemy struct {
-	// x int
-	// y int
-}
-
-type Particle struct {
-}
-
-func reset(player *Player) {
-	player.goingUp = false
-	player.goingDown = false
-	player.goingRight = false
-	player.goingLeft = false
 }
 
 func playerMove(player *Player) {
@@ -70,6 +57,29 @@ func playerMove(player *Player) {
 
 }
 
+type Projectile struct {
+	x      float32
+	y      float32
+	radius int
+	speed  float32
+	angle  float32
+}
+
+type Enemy struct {
+	// x int
+	// y int
+}
+
+type Particle struct {
+}
+
+func reset(player *Player) {
+	player.goingUp = false
+	player.goingDown = false
+	player.goingRight = false
+	player.goingLeft = false
+}
+
 func restart(player *Player) {
 	player.x = WIDTH / 2
 	player.y = HEIGHT / 2
@@ -92,8 +102,20 @@ func main() {
 	defer rl.CloseWindow()
 
 	for !rl.WindowShouldClose() {
+
+		if rl.IsMouseButtonDown(rl.MouseLeftButton) {
+			mousePos := rl.GetMousePosition()
+			angle := math.Atan2(float64(player.y)-float64(mousePos.Y), float64(player.x)-float64(mousePos.X))
+			projectiles = append(projectiles, Projectile{x: player.x, y: player.y, speed: 5, radius: 4, angle: float32(angle)})
+		}
+
 		rl.BeginDrawing()
 		rl.ClearBackground(color.RGBA{34, 40, 49, 50})
+
+		for i := 0; i < len(projectiles); i++ {
+			rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
+		}
+
 		playerMove(&player)
 		rl.DrawCircle(int32(player.x), int32(player.y), float32(player.radius), player.color)
 		rl.EndDrawing()

@@ -11,6 +11,7 @@ const WIDTH = 1200
 const HEIGHT = 700
 
 var projectiles []Projectile
+var enemies []Enemy
 
 type Player struct {
 	x      float32
@@ -71,8 +72,47 @@ func projectileMove(projectile *Projectile) {
 }
 
 type Enemy struct {
-	// x int
-	// y int
+	x      float32
+	y      float32
+	speed  float32
+	color  rl.Color
+	angle  float32
+	radius int32
+}
+
+func enemyMove(enemy *Enemy) {
+	enemy.x += float32(math.Cos(float64(enemy.angle)) * float64(enemy.speed))
+	enemy.y += float32(math.Sin(float64(enemy.angle)) * float64(enemy.speed))
+}
+
+func createEnemy(player Player) {
+	randomValue := rl.GetRandomValue(int32(0), int32(3))
+
+	var x float32
+	var y float32
+
+	if randomValue == 0 {
+		x = float32(rl.GetRandomValue(int32(0), int32(WIDTH)))
+		y = float32(-20)
+	} else if randomValue == 1 {
+		x = float32(rl.GetRandomValue(int32(0), int32(WIDTH)))
+		y = float32(HEIGHT + 20)
+	} else if randomValue == 2 {
+		x = float32(-20)
+		y = float32(rl.GetRandomValue(int32(0), int32(HEIGHT)))
+	} else {
+		x = float32(WIDTH + 20)
+		y = float32(rl.GetRandomValue(int32(0), int32(HEIGHT)))
+	}
+
+	speed := float32(rl.GetRandomValue(50, 150))/100.00 + 0.50
+	radius := float32(rl.GetRandomValue(10, 30))
+
+	color := color.RGBA{R: uint8(rl.GetRandomValue(0, 255)), G: uint8(rl.GetRandomValue(0, 255)), B: uint8(rl.GetRandomValue(0, 255)), A: 255}
+
+	angle := float32(math.Atan2(float64(player.y-y), float64(player.x-x)))
+
+	enemies = append(enemies, Enemy{x: x, y: y, speed: speed, radius: int32(radius), color: color, angle: angle})
 }
 
 type Particle struct {
@@ -90,7 +130,7 @@ func restart(player *Player) {
 	player.y = HEIGHT / 2
 	player.color = rl.White
 	player.radius = 10
-	player.speed = 5
+	player.speed = 3
 
 	reset(player)
 }
@@ -105,21 +145,29 @@ func main() {
 	rl.SetTargetFPS(60)
 
 	defer rl.CloseWindow()
-
+	counter := 0
 	for !rl.WindowShouldClose() {
-
+		counter++
+		if counter%40 == 0 {
+			createEnemy(player)
+		}
 		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
 			mousePos := rl.GetMousePosition()
 			angle := math.Atan2(float64(mousePos.Y)-float64(player.y), float64(mousePos.X)-float64(player.x))
-			projectiles = append(projectiles, Projectile{x: player.x, y: player.y, speed: 5, radius: 4, angle: float32(angle)})
+			projectiles = append(projectiles, Projectile{x: player.x, y: player.y, speed: 6, radius: 5, angle: float32(angle)})
 		}
 
 		rl.BeginDrawing()
-		rl.ClearBackground(color.RGBA{34, 40, 49, 50})
+		rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
 
 		for i := 0; i < len(projectiles); i++ {
 			projectileMove(&projectiles[i])
 			rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
+		}
+
+		for i := 0; i < len(enemies); i++ {
+			enemyMove(&enemies[i])
+			rl.DrawCircle(int32(enemies[i].x), int32(enemies[i].y), float32(enemies[i].radius), enemies[i].color)
 		}
 
 		playerMove(&player)

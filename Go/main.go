@@ -13,6 +13,8 @@ const HEIGHT = 700
 var projectiles []Projectile
 var enemies []Enemy
 
+var gameOver bool = false
+
 type Player struct {
 	x      float32
 	y      float32
@@ -61,7 +63,7 @@ func playerMove(player *Player) {
 type Projectile struct {
 	x      float32
 	y      float32
-	radius int
+	radius float32
 	speed  float32
 	angle  float32
 }
@@ -69,6 +71,11 @@ type Projectile struct {
 func projectileMove(projectile *Projectile) {
 	projectile.x += float32(math.Cos(float64(projectile.angle)) * float64(projectile.speed))
 	projectile.y += float32(math.Sin(float64(projectile.angle)) * float64(projectile.speed))
+
+	if projectile.x > WIDTH+projectile.radius || projectile.x < 0-projectile.radius ||
+		projectile.y > HEIGHT+projectile.radius || projectile.y < 0-projectile.radius {
+
+	}
 }
 
 type Enemy struct {
@@ -146,7 +153,7 @@ func main() {
 
 	defer rl.CloseWindow()
 	counter := 0
-	for !rl.WindowShouldClose() {
+	for !rl.WindowShouldClose() && !gameOver {
 		counter++
 		if counter%40 == 0 {
 			createEnemy(player)

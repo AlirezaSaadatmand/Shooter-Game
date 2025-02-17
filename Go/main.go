@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 
@@ -13,6 +12,7 @@ const HEIGHT = 700
 
 var projectiles []Projectile
 var enemies []Enemy
+var particles []Particle
 
 var gameOver bool = false
 
@@ -130,6 +130,40 @@ func createEnemy(player Player) {
 }
 
 type Particle struct {
+	x       float32
+	y       float32
+	color   color.RGBA
+	angleX  float32
+	angleY  float32
+	radius  int32
+	opacity int
+}
+
+func particleMove(particle *Particle) bool {
+	particle.x += particle.angleX * float32(0.90)
+	particle.y += particle.angleY * float32(0.90)
+	particle.opacity -= 2
+	if particle.opacity <= 0 {
+		return true
+	}
+	particle.color.A = uint8(particle.opacity)
+	return false
+}
+
+func createParticles(projectile Projectile, enemy Enemy) {
+	for i := 0; i < int(enemy.radius)*2; i++ {
+
+		x := projectile.x
+		y := projectile.y
+
+		radius := rl.GetRandomValue(int32(1), int32(3))
+		color := enemy.color
+
+		angleX := (float32(rl.GetRandomValue(0, 100))/100.0 - 0.5) * (float32(rl.GetRandomValue(0, 100)) / 100.0 * 6)
+		angleY := (float32(rl.GetRandomValue(0, 100))/100.0 - 0.5) * (float32(rl.GetRandomValue(0, 100)) / 100.0 * 6)
+
+		particles = append(particles, Particle{x: x, y: y, radius: radius, color: color, angleX: angleX, angleY: angleY, opacity: 255})
+	}
 }
 
 func collision(enemy Enemy, projectile Projectile) bool {
@@ -171,7 +205,6 @@ func main() {
 	for !rl.WindowShouldClose() && !gameOver {
 		counter++
 		if counter%40 == 0 {
-			fmt.Println(len(projectiles))
 			createEnemy(player)
 		}
 		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
@@ -183,6 +216,14 @@ func main() {
 		rl.BeginDrawing()
 		rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
 
+		for i := 0; i < len(particles); i++ {
+			if particleMove(&particles[i]) {
+				particles = append(particles[:i], particles[i+1:]...)
+				continue
+			}
+			rl.DrawCircle(int32(particles[i].x), int32(particles[i].y), float32(particles[i].radius), particles[i].color)
+		}
+
 		for i := 0; i < len(projectiles); i++ {
 			if projectileMove(&projectiles[i]) {
 				projectiles = append(projectiles[:i], projectiles[i+1:]...)
@@ -192,6 +233,7 @@ func main() {
 
 			for j := 0; j < len(enemies); j++ {
 				if collision(enemies[j], projectiles[i]) {
+					createParticles(projectiles[i], enemies[j])
 					projectiles = append(projectiles[:i], projectiles[i+1:]...)
 					enemies = append(enemies[:j], enemies[j+1:]...)
 					i--

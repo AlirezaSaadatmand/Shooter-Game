@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
@@ -68,14 +69,15 @@ type Projectile struct {
 	angle  float32
 }
 
-func projectileMove(projectile *Projectile) {
+func projectileMove(projectile *Projectile) bool {
 	projectile.x += float32(math.Cos(float64(projectile.angle)) * float64(projectile.speed))
 	projectile.y += float32(math.Sin(float64(projectile.angle)) * float64(projectile.speed))
 
 	if projectile.x > WIDTH+projectile.radius || projectile.x < 0-projectile.radius ||
 		projectile.y > HEIGHT+projectile.radius || projectile.y < 0-projectile.radius {
-
+		return true
 	}
+	return false
 }
 
 type Enemy struct {
@@ -87,9 +89,14 @@ type Enemy struct {
 	radius int32
 }
 
-func enemyMove(enemy *Enemy) {
+func enemyMove(enemy *Enemy) bool {
 	enemy.x += float32(math.Cos(float64(enemy.angle)) * float64(enemy.speed))
 	enemy.y += float32(math.Sin(float64(enemy.angle)) * float64(enemy.speed))
+
+	if enemy.x < -100 || enemy.x > WIDTH+100 || enemy.y < -100 || enemy.y > HEIGHT+100 {
+		return true
+	}
+	return false
 }
 
 func createEnemy(player Player) {
@@ -100,20 +107,20 @@ func createEnemy(player Player) {
 
 	if randomValue == 0 {
 		x = float32(rl.GetRandomValue(int32(0), int32(WIDTH)))
-		y = float32(-20)
+		y = float32(-30)
 	} else if randomValue == 1 {
 		x = float32(rl.GetRandomValue(int32(0), int32(WIDTH)))
-		y = float32(HEIGHT + 20)
+		y = float32(HEIGHT + 30)
 	} else if randomValue == 2 {
-		x = float32(-20)
+		x = float32(-30)
 		y = float32(rl.GetRandomValue(int32(0), int32(HEIGHT)))
 	} else {
-		x = float32(WIDTH + 20)
+		x = float32(WIDTH + 30)
 		y = float32(rl.GetRandomValue(int32(0), int32(HEIGHT)))
 	}
 
 	speed := float32(rl.GetRandomValue(50, 150))/100.00 + 0.50
-	radius := float32(rl.GetRandomValue(10, 30))
+	radius := float32(rl.GetRandomValue(10, 40))
 
 	color := color.RGBA{R: uint8(rl.GetRandomValue(0, 255)), G: uint8(rl.GetRandomValue(0, 255)), B: uint8(rl.GetRandomValue(0, 255)), A: 255}
 
@@ -156,6 +163,7 @@ func main() {
 	for !rl.WindowShouldClose() && !gameOver {
 		counter++
 		if counter%40 == 0 {
+			fmt.Println(len(projectiles))
 			createEnemy(player)
 		}
 		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
@@ -168,12 +176,18 @@ func main() {
 		rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
 
 		for i := 0; i < len(projectiles); i++ {
-			projectileMove(&projectiles[i])
+			if projectileMove(&projectiles[i]) {
+				projectiles = append(projectiles[:i], projectiles[i+1:]...)
+				continue
+			}
 			rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
 		}
 
 		for i := 0; i < len(enemies); i++ {
-			enemyMove(&enemies[i])
+			if enemyMove(&enemies[i]) {
+				enemies = append(enemies[:i], enemies[i+1:]...)
+				continue
+			}
 			rl.DrawCircle(int32(enemies[i].x), int32(enemies[i].y), float32(enemies[i].radius), enemies[i].color)
 		}
 

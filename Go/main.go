@@ -132,6 +132,14 @@ func createEnemy(player Player) {
 type Particle struct {
 }
 
+func collision(enemy Enemy, projectile Projectile) bool {
+	dx := float64(enemy.x - projectile.x)
+	dy := float64(enemy.y - projectile.y)
+	distance := math.Sqrt(dx*dx + dy*dy)
+
+	return distance < float64(enemy.radius+int32(projectile.radius))
+}
+
 func reset(player *Player) {
 	player.goingUp = false
 	player.goingDown = false
@@ -178,14 +186,28 @@ func main() {
 		for i := 0; i < len(projectiles); i++ {
 			if projectileMove(&projectiles[i]) {
 				projectiles = append(projectiles[:i], projectiles[i+1:]...)
+				i--
 				continue
 			}
-			rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
+
+			for j := 0; j < len(enemies); j++ {
+				if collision(enemies[j], projectiles[i]) {
+					projectiles = append(projectiles[:i], projectiles[i+1:]...)
+					enemies = append(enemies[:j], enemies[j+1:]...)
+					i--
+					break
+				}
+			}
+
+			if i >= 0 && i < len(projectiles) {
+				rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
+			}
 		}
 
 		for i := 0; i < len(enemies); i++ {
 			if enemyMove(&enemies[i]) {
 				enemies = append(enemies[:i], enemies[i+1:]...)
+				i--
 				continue
 			}
 			rl.DrawCircle(int32(enemies[i].x), int32(enemies[i].y), float32(enemies[i].radius), enemies[i].color)

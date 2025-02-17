@@ -252,6 +252,13 @@ func main() {
 				i--
 				continue
 			}
+			dx := float64(enemies[i].x - player.x)
+			dy := float64(enemies[i].y - player.y)
+			distance := math.Sqrt(dx*dx + dy*dy)
+			if distance < float64(player.radius)+float64(enemies[i].radius) {
+				gameOver = true
+			}
+
 			rl.DrawCircle(int32(enemies[i].x), int32(enemies[i].y), float32(enemies[i].radius), enemies[i].color)
 		}
 

@@ -13,8 +13,9 @@ const HEIGHT = 700
 var projectiles []Projectile
 var enemies []Enemy
 var particles []Particle
-
+var shirink []Enemy
 var gameOver bool = false
+var counter int = 0
 
 type Player struct {
 	x      float32
@@ -187,8 +188,15 @@ func restart(player *Player) {
 	player.color = rl.White
 	player.radius = 10
 	player.speed = 3
+	counter = 0
 
 	reset(player)
+
+	projectiles = nil
+	enemies = nil
+	particles = nil
+
+	gameOver = false
 }
 
 func main() {
@@ -201,69 +209,77 @@ func main() {
 	rl.SetTargetFPS(60)
 
 	defer rl.CloseWindow()
-	counter := 0
-	for !rl.WindowShouldClose() && !gameOver {
-		counter++
-		if counter%40 == 0 {
-			createEnemy(player)
-		}
-		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
-			mousePos := rl.GetMousePosition()
-			angle := math.Atan2(float64(mousePos.Y)-float64(player.y), float64(mousePos.X)-float64(player.x))
-			projectiles = append(projectiles, Projectile{x: player.x, y: player.y, speed: 6, radius: 5, angle: float32(angle)})
-		}
-
+	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
-		rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
+		if !gameOver {
 
-		for i := 0; i < len(particles); i++ {
-			if particleMove(&particles[i]) {
-				particles = append(particles[:i], particles[i+1:]...)
-				continue
+			counter++
+			if counter%40 == 0 {
+				createEnemy(player)
 			}
-			rl.DrawCircle(int32(particles[i].x), int32(particles[i].y), float32(particles[i].radius), particles[i].color)
-		}
-
-		for i := 0; i < len(projectiles); i++ {
-			if projectileMove(&projectiles[i]) {
-				projectiles = append(projectiles[:i], projectiles[i+1:]...)
-				i--
-				continue
+			if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
+				mousePos := rl.GetMousePosition()
+				angle := math.Atan2(float64(mousePos.Y)-float64(player.y), float64(mousePos.X)-float64(player.x))
+				projectiles = append(projectiles, Projectile{x: player.x, y: player.y, speed: 6, radius: 5, angle: float32(angle)})
 			}
 
-			for j := 0; j < len(enemies); j++ {
-				if collision(enemies[j], projectiles[i]) {
-					createParticles(projectiles[i], enemies[j])
+			rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
+
+			for i := 0; i < len(particles); i++ {
+				if particleMove(&particles[i]) {
+					particles = append(particles[:i], particles[i+1:]...)
+					continue
+				}
+				rl.DrawCircle(int32(particles[i].x), int32(particles[i].y), float32(particles[i].radius), particles[i].color)
+			}
+
+			for i := 0; i < len(projectiles); i++ {
+				if projectileMove(&projectiles[i]) {
 					projectiles = append(projectiles[:i], projectiles[i+1:]...)
-					enemies = append(enemies[:j], enemies[j+1:]...)
 					i--
-					break
+					continue
+				}
+
+				for j := 0; j < len(enemies); j++ {
+					if collision(enemies[j], projectiles[i]) {
+						createParticles(projectiles[i], enemies[j])
+						projectiles = append(projectiles[:i], projectiles[i+1:]...)
+						enemies = append(enemies[:j], enemies[j+1:]...)
+						i--
+						break
+					}
+				}
+
+				if i >= 0 && i < len(projectiles) {
+					rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
 				}
 			}
 
-			if i >= 0 && i < len(projectiles) {
-				rl.DrawCircle(int32(projectiles[i].x), int32(projectiles[i].y), float32(projectiles[i].radius), color.RGBA{255, 255, 255, 255})
+			for i := 0; i < len(enemies); i++ {
+				if enemyMove(&enemies[i]) {
+					enemies = append(enemies[:i], enemies[i+1:]...)
+					i--
+					continue
+				}
+				dx := float64(enemies[i].x - player.x)
+				dy := float64(enemies[i].y - player.y)
+				distance := math.Sqrt(dx*dx + dy*dy)
+				if distance < float64(player.radius)+float64(enemies[i].radius) {
+					gameOver = true
+				}
+
+				rl.DrawCircle(int32(enemies[i].x), int32(enemies[i].y), float32(enemies[i].radius), enemies[i].color)
+			}
+
+			playerMove(&player)
+			rl.DrawCircle(int32(player.x), int32(player.y), float32(player.radius), player.color)
+		} else {
+			rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
+			rl.DrawText("press ENTER to restart?", WIDTH/2-170, HEIGHT/2-30, 30, rl.Red)
+			if rl.IsKeyPressed(rl.KeyEnter) {
+				restart(&player)
 			}
 		}
-
-		for i := 0; i < len(enemies); i++ {
-			if enemyMove(&enemies[i]) {
-				enemies = append(enemies[:i], enemies[i+1:]...)
-				i--
-				continue
-			}
-			dx := float64(enemies[i].x - player.x)
-			dy := float64(enemies[i].y - player.y)
-			distance := math.Sqrt(dx*dx + dy*dy)
-			if distance < float64(player.radius)+float64(enemies[i].radius) {
-				gameOver = true
-			}
-
-			rl.DrawCircle(int32(enemies[i].x), int32(enemies[i].y), float32(enemies[i].radius), enemies[i].color)
-		}
-
-		playerMove(&player)
-		rl.DrawCircle(int32(player.x), int32(player.y), float32(player.radius), player.color)
 		rl.EndDrawing()
 	}
 }

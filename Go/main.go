@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
@@ -16,6 +17,7 @@ var particles []Particle
 var shirink []*Enemy
 var gameOver bool = false
 var counter int = 0
+var score int = 0
 
 type Player struct {
 	x      float32
@@ -85,7 +87,7 @@ type Enemy struct {
 	x      float32
 	y      float32
 	speed  float32
-	color  rl.Color
+	color  color.RGBA
 	angle  float32
 	radius int32
 	start  int
@@ -174,7 +176,7 @@ func collision(enemy Enemy, projectile Projectile) bool {
 	dy := float64(enemy.y - projectile.y)
 	distance := math.Sqrt(dx*dx + dy*dy)
 
-	return distance < float64(enemy.radius+int32(projectile.radius))
+	return distance-1 < float64(enemy.radius+int32(projectile.radius))
 }
 
 func reset(player *Player) {
@@ -191,6 +193,7 @@ func restart(player *Player) {
 	player.radius = 10
 	player.speed = 3
 	counter = 0
+	score = 0
 
 	reset(player)
 
@@ -227,6 +230,7 @@ func main() {
 
 			rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
 
+			rl.DrawText(fmt.Sprintf("Score: %d", score), 20, 20, 15, rl.White)
 			// Particles
 			for i := 0; i < len(particles); i++ {
 				if particleMove(&particles[i]) {
@@ -246,7 +250,7 @@ func main() {
 
 				for j := 0; j < len(enemies); j++ {
 					if collision(enemies[j], projectiles[i]) {
-						if enemies[j].radius <= 15 {
+						if enemies[j].radius <= 20 {
 							enemies = append(enemies[:j], enemies[j+1:]...)
 						} else {
 							enemies[j].start = counter
@@ -256,6 +260,7 @@ func main() {
 						createParticles(projectiles[i], enemies[j])
 						projectiles = append(projectiles[:i], projectiles[i+1:]...)
 						i--
+						score += 10
 						break
 					}
 				}

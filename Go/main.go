@@ -13,7 +13,7 @@ const HEIGHT = 700
 var projectiles []Projectile
 var enemies []Enemy
 var particles []Particle
-var shirink []Enemy
+var shirink []*Enemy
 var gameOver bool = false
 var counter int = 0
 
@@ -88,6 +88,8 @@ type Enemy struct {
 	color  rl.Color
 	angle  float32
 	radius int32
+	start  int
+	end    int
 }
 
 func enemyMove(enemy *Enemy) bool {
@@ -225,6 +227,7 @@ func main() {
 
 			rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
 
+			// Particles
 			for i := 0; i < len(particles); i++ {
 				if particleMove(&particles[i]) {
 					particles = append(particles[:i], particles[i+1:]...)
@@ -233,6 +236,7 @@ func main() {
 				rl.DrawCircle(int32(particles[i].x), int32(particles[i].y), float32(particles[i].radius), particles[i].color)
 			}
 
+			// Projectiles
 			for i := 0; i < len(projectiles); i++ {
 				if projectileMove(&projectiles[i]) {
 					projectiles = append(projectiles[:i], projectiles[i+1:]...)
@@ -242,9 +246,15 @@ func main() {
 
 				for j := 0; j < len(enemies); j++ {
 					if collision(enemies[j], projectiles[i]) {
+						if enemies[j].radius <= 15 {
+							enemies = append(enemies[:j], enemies[j+1:]...)
+						} else {
+							enemies[j].start = counter
+							enemies[j].end = counter + int(enemies[j].radius)/2
+							shirink = append(shirink, &enemies[j])
+						}
 						createParticles(projectiles[i], enemies[j])
 						projectiles = append(projectiles[:i], projectiles[i+1:]...)
-						enemies = append(enemies[:j], enemies[j+1:]...)
 						i--
 						break
 					}
@@ -255,6 +265,16 @@ func main() {
 				}
 			}
 
+			// Shirink enemies
+			for i := 0; i < len(shirink); i++ {
+				if counter < shirink[i].end {
+					shirink[i].radius--
+				} else {
+					shirink = append(shirink[:i], shirink[i+1:]...)
+				}
+			}
+
+			// Enemies
 			for i := 0; i < len(enemies); i++ {
 				if enemyMove(&enemies[i]) {
 					enemies = append(enemies[:i], enemies[i+1:]...)
@@ -271,11 +291,12 @@ func main() {
 				rl.DrawCircle(int32(enemies[i].x), int32(enemies[i].y), float32(enemies[i].radius), enemies[i].color)
 			}
 
+			// Player
 			playerMove(&player)
 			rl.DrawCircle(int32(player.x), int32(player.y), float32(player.radius), player.color)
 		} else {
 			rl.DrawRectangle(int32(0), int32(0), int32(WIDTH), int32(HEIGHT), color.RGBA{34, 40, 49, 150})
-			rl.DrawText("press ENTER to restart?", WIDTH/2-170, HEIGHT/2-30, 30, rl.Red)
+			rl.DrawText("press ENTER to restart.", WIDTH/2-170, HEIGHT/2-30, 30, rl.Red)
 			if rl.IsKeyPressed(rl.KeyEnter) {
 				restart(&player)
 			}
